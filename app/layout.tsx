@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local"
+import NextTopLoader from "nextjs-toploader";
+import { Bounce, ToastContainer, toast } from 'react-toastify';
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+
+
+
+
+
+
+const iransans = localFont({
+  src: [
+    {
+      // ../ یعنی از app برو بیرون، بعد برو تو fonts
+      path: "../fonts/IRANSansWeb_Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-iransans",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,11 +36,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="fa" dir="rtl">
+      <body className={iransans.className} >
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={true}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
+        <main className="">
+          <NextTopLoader
+            color="#ef4444"   // قرمز (Tailwind red-500)
+            height={3}
+            showSpinner={false}
+          />
+
+          <AuthProvider>
+           {children}
+        </AuthProvider>
+        </main>
       </body>
     </html>
   );
