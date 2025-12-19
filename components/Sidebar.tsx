@@ -6,9 +6,9 @@ import AccountRenewal from "./AccountRenewal";
 import { tabsData } from "@/lib/constats";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-
-
-// دیتاهای نمونه
+import MyAccount from "./MyAccount";
+import MyWallet from "./MyWallet";
+import BuyAccount from "./BuyAccount";
 
 
 export default function Sidebar() {
@@ -18,6 +18,24 @@ export default function Sidebar() {
   const { isLoggedIn, isLoading, user, logOut } = useAuth();
 
 
+
+  // 3. تابع سوییچ برای انتخاب کامپوننت مناسب
+  // این تابع تصمیم می‌گیرد کدام کامپوننت الان باید رندر شود
+  const renderContent = () => {
+    switch (activeTabId) {
+      case "myAccount":
+        return <MyAccount />;
+      case "buyAccount":
+        return <BuyAccount />;
+      case "AccountRenewal":
+        return <AccountRenewal />;
+      case "myWallet":
+        // 4. اینجا مقدار موجودی را به کامپوننت کیف پول پاس می‌دهیم
+        return <MyWallet  />;
+      default:
+        return <MyAccount />;
+    }
+  };
 
 
   return (
@@ -108,7 +126,7 @@ export default function Sidebar() {
             ) : (
               // حالتی که کاربر لاگین است (می‌توانی شماره‌اش را نشان دهی)
               <div className="mb-4 text-green-600 space-x-3.5 flex items-center justify-center">
-                سلام کاربر {user?.phone} 👋
+                سلام کاربر {user?.phoneNumber} 👋
 
                 <button type="button" onClick={logOut} 
                  className=" cursor-pointer  bg-red-700 hover:from-red-700 hover:to-red-600 text-white  py-1 px-4 rounded-xl shadow-lg  transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">خروج</button>
@@ -117,7 +135,7 @@ export default function Sidebar() {
             )}
 
             <h2 className="text-lg font-semibold text-gray-700">
-              {tabsData.find((t) => t.id === activeTabId)?.component}
+            {renderContent()}
             </h2>
 
 

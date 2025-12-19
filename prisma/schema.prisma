@@ -11,11 +11,13 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  phoneNumber String   @unique
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber String  @unique
   otpCode     String?
   otpExpires  String?
 
+  userWallet  Int      @default(0)
+  usreAccount String[] @default([])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
