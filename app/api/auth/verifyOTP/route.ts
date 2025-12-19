@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     // ۵. اگر همه چیز درست بود (ساخت توکن)
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_secret');
-    const token = await new SignJWT({ userId: user.id, phone: user.phoneNumber })
+    const token = await new SignJWT({ userId: user.id, phoneNumber: user.phoneNumber })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')
       .sign(secret);

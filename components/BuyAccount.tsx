@@ -1,32 +1,33 @@
 "use client";
 import { addUserAction } from "@/app/(user)/dashboard/actions";
 import { useAuth } from "@/context/AuthContext";
-import { Check, Copy, History, UserCheck, HardDrive, CalendarDays, ShoppingBag, Loader2 } from "lucide-react";
+import pricing from "@/lib/pricing";
+import {  Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const BuyAccount = () => {
   const { user, isLoading, checkAuth } = useAuth();
+  const router = useRouter();
 
   const [traffic, setTraffic] = useState(10);
   const [month, setMonth] = useState(31);
 
   const [inviteCode, setInviteCode] = useState("");
-  const [isCopied, setIsCopied] = useState(false);
-  const [purchasedAccounts, setPurchasedAccounts] = useState([
-    {
-      id: 1,
-      username: inviteCode,
-      gb: traffic,
-      days: month,
-      date: new Date().toISOString(),
-    },
-  ]);
+  // const [isCopied, setIsCopied] = useState(false);
+  // const [purchasedAccounts, setPurchasedAccounts] = useState([
+  //   {
+  //     id: 1,
+  //     username: inviteCode,
+  //     gb: traffic,
+  //     days: month,
+  //     date: new Date().toISOString(),
+  //   },
+  // ]);
 
   //استیت برای لودینگ
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  let basePrice = 3000;
 
   function handleChangeGB(e) {
     const val = Number(e.target.value);
@@ -142,20 +143,7 @@ const BuyAccount = () => {
     generateCode();
   }, []);
 
-  // تابع کپی در کلیپ‌بورد
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteCode);
-      setIsCopied(true);
-
-      // برگرداندن آیکون به حالت قبل بعد از ۲ ثانیه
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
+  const currentPrice = pricing(traffic, month);
 
   // تابع تبدیل تاریخ میلادی به شمسی
   const toPersianDate = (dateString: string | number | Date) => {
@@ -170,6 +158,22 @@ const BuyAccount = () => {
 
   const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // 🔴 چک کردن وضعیت لاگین قبل از هر کاری
+    if (!user) {
+      toast.warn("برای خرید اشتراک ابتدا باید وارد حساب کاربری خود شوید.");
+      // هدایت به صفحه لاگین
+      router.push(`/auth/login?redirect=/`);
+      // جلوگیری از ادامه اجرای تابع
+      return;
+    }
+
+
+    if(user.userWallet < currentPrice){
+      toast.warn("موجودی کیف پول شما کافی نیست.");
+      return;
+    } 
+
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -181,26 +185,14 @@ const BuyAccount = () => {
       const result = await addUserAction(formData);
       if (result.success == true) {
         toast.success("اشتراک با موفقیت خریداری شد");
-      }else{
+      } else {
         toast.error("خطا در انجام عملیات");
       }
-
-
-
     } catch (error) {
       console.error("Error buying account:", error);
     } finally {
       setIsSubmitting(false); // پایان لودینگ
     }
-
-    // setPurchasedAccounts([ ...purchasedAccounts, {
-    //     id: purchasedAccounts.length + 1,
-    //     username: inviteCode,
-    //     gb: traffic,
-    //     days: month,
-    //     date: new Date().toISOString(),
-    //   },
-    // ]);
   };
 
   return (
@@ -288,13 +280,14 @@ const BuyAccount = () => {
             <div className="mt-2 p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center gap-1">
               <p className="text-amber-800/70 text-xs font-medium">مبلغ قابل پرداخت</p>
               <div className="flex items-baseline gap-1 text-amber-900">
-                <span className="text-2xl font-black tracking-tight">
-                  {month > 31
-                    ? (traffic * (basePrice + 1300)).toLocaleString()
-                    : (traffic * basePrice).toLocaleString()}
-                </span>
+                <span className="text-2xl font-black tracking-tight">{currentPrice}</span>
+
                 <span className="text-sm font-medium">تومان</span>
               </div>
+              <hr />
+              <span className="text-xs border-t-2 py-1.5 text-gray-500">
+                {user?.userWallet ? `موجودی کیف پول: ${user.userWallet} تومان` : ""}
+              </span>
             </div>
 
             {/* دکمه ارسال */}
