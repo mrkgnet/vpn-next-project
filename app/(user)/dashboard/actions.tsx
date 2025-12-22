@@ -20,8 +20,8 @@ const CONFIG = {
     login: "/login",
     listInbounds: "/panel/api/inbounds/list",
     addClient: "/panel/api/inbounds/addClient",
-    updateInbound: "/panel/api/inbounds/update", // مسیر جدید برای آپدیت کل اینباند
-    // userTraffic: "/panel/api/inbounds/getClientTraffics/vipsha"
+    updateInbound: "/panel/api/inbounds/update",
+    clientTraffic: "/panel/api/inbounds/getClientTraffics/",
   },
 };
 
@@ -73,52 +73,70 @@ export async function getData() {
 
 // --- افزودن کاربر ---
 export async function addUserAction(formData: FormData) {
-  const { user, isLoading, checkAuth } = useAuth();
-  if (!user) {
-    return { success: false, message: "لطفا ابتدا وارد حساب کاربری شوید" };
-  }
-  const email = formData.get("email") as string;
-  const gbInput = formData.get("totalGB") as string;
-  const daysInput = formData.get("days") as string;
-  console.log(email + "-" + gbInput + "-" + daysInput);
+  // ۱. دریافت و تبدیل داده‌ها به عدد (همین اول کار تبدیل کنید)
+  const email = formData.get("username") as string; // در فرم شما name="username" بود، اینجا درستش کردم
+  const gbInput = formData.get("totalGB");
+  const daysInput = formData.get("days");
 
+  const gb = Number(gbInput);
+  const days = Number(daysInput);
+
+  console.log(email + "-" + gb + "-" + days);
+
+  if (!email) return { success: false, message: "نام کاربری الزامی است" };
+
+  // ۲. چک کردن توکن
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value; // اسم کوکی توکن شما
+  const token = cookieStore.get("token")?.value;
 
   if (!token) {
     return { success: false, message: "لطفا ابتدا وارد حساب کاربری شوید" };
   }
 
   const secret = process.env.JWT_SECRET || "fallback";
-  const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-  const currentPrice = pricing(parseInt(gbInput), parseInt(daysInput));
-  
-  if(currentPrice < user.userWallet) 
-  {
-      return { success: false, message: "موجودی حساب شما کافی نیست" };
+  let userPhone: string;
+
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    // مطمئن شوید که در توکن کلید phoneNumber وجود دارد
+    userPhone = payload.phoneNumber as string;
+  } catch (err) {
+    return { success: false, message: "نشست کاربری نامعتبر" };
   }
 
+  const currentPrice = pricing(gb, days);
 
-  
+  // ۳. پیدا کردن کاربر و بررسی موجودی (قبل از هر ریکوئستی به پنل)
+  // متغیر user را اینجا تعریف می‌کنیم تا در کل تابع در دسترس باشد
+  let user;
 
-  //
+  try {
+    user = await prisma.user.findUnique({
+      where: { phoneNumber: userPhone },
+    });
+
+    if (!user) return { success: false, message: "کاربر یافت نشد" };
+    if (user.userWallet < currentPrice) return { success: false, message: "موجودی کافی نیست" };
+  } catch (err) {
+    return { success: false, message: "خطا در ارتباط با دیتابیس" };
+  }
+
+  // ۴. لاجیک پنل (بدون تغییر زیاد، فقط تمیزکاری)
   const targetPort = 51222;
-
-  if (!email) return { success: false, message: "ایمیل الزامی است" };
-
   let totalBytes = 0;
-  if (gbInput && Number(gbInput) > 0) {
-    totalBytes = Number(gbInput) * 1024 * 1024 * 1024;
+  if (gb > 0) {
+    totalBytes = gb * 1024 * 1024 * 1024;
   }
 
   let expiryTime = 0;
-  if (daysInput && Number(daysInput) > 0) {
+  if (days > 0) {
     const now = Date.now();
-    const daysInMillis = Number(daysInput) * 24 * 60 * 60 * 1000;
+    const daysInMillis = days * 24 * 60 * 60 * 1000;
     expiryTime = now + daysInMillis;
   }
 
   try {
+    // --- شروع عملیات پنل ---
     const cookie = await getCookie();
     const listRes = await fetch(`${CONFIG.baseUrl}${CONFIG.endpoints.listInbounds}`, {
       headers: { Cookie: cookie, "Content-Type": "application/json" },
@@ -139,8 +157,7 @@ export async function addUserAction(formData: FormData) {
     }
 
     const existingClient = settings?.clients?.find((c: any) => c.email === cleanEmail);
-    if (existingClient)
-      return { success: false, message: "این کاربر از قبل وجود دارد، لطفا از بخش آپدیت استفاده کنید." };
+    if (existingClient) return { success: false, message: "این کاربر از قبل وجود دارد." };
 
     const newClient = {
       id: crypto.randomUUID(),
@@ -164,14 +181,44 @@ export async function addUserAction(formData: FormData) {
     });
 
     const result = await addRes.json();
+    // --- پایان عملیات پنل ---
+
     if (result.success) {
-      revalidatePath("/products");
-      return { success: true, message: "کاربر با موفقیت ساخته شد" };
+      // ۵. ثبت در دیتابیس و کسر موجودی
+      // چون user را بالا (خارج از try) گرفتیم، اینجا به user.id دسترسی داریم
+      await prisma.$transaction(async (tx) => {
+        // الف: کسر پول
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            userWallet: { decrement: currentPrice },
+          },
+        });
+
+        // ب: ثبت خرید
+        await tx.purchase.create({
+          data: {
+            username: cleanEmail,
+            gb: gb, // اینجا عدد پاس می‌دهیم (نه رشته)
+            days: days, // اینجا عدد پاس می‌دهیم (نه رشته)
+            price: currentPrice,
+            userId: user.id,
+          },
+        });
+      });
+
+      revalidatePath("/dashboard");
+      return {
+        status: 200,
+        success: true,
+        message: "اشتراک با موفقیت خریداری و ساخته شد",
+      };
     } else {
       return { success: false, message: result.msg || "خطا در پنل" };
     }
   } catch (error: any) {
-    return { success: false, message: error.message };
+    console.error("Server Action Error:", error); // حتما لاگ بگیرید تا خطا را در ترمینال ببینید
+    return { success: false, message: error.message || "خطای ناشناخته سرور" };
   }
 }
 
@@ -356,7 +403,17 @@ export async function updateUserAction(formData: FormData) {
 }
 
 // --- اکشن دریافت لینک VLESS ---
-export async function getVlessLinkAction(formData: FormData) {
+
+
+// تابع کمکی برای لاگ گرفتن در ترمینال (برای عیب‌یابی)
+const logServer = (msg: string, data: any) => {
+  console.log(`>>>> SERVER [${new Date().toLocaleTimeString()}]: ${msg}`, JSON.stringify(data));
+};
+
+
+
+
+export async function getVlessLinkDetailsAction(formData: FormData) {
   const email = formData.get("email") as string;
   const cleanEmail = email ? email.trim() : "";
 
@@ -365,75 +422,72 @@ export async function getVlessLinkAction(formData: FormData) {
   try {
     const cookie = await getCookie();
 
-    // 1. دریافت لیست کل اینباندها (متد GET)
+    // ۱. دریافت لیست اینباندها (حاوی دیتای مصرف کاربران)
     const listRes = await fetch(`${CONFIG.baseUrl}${CONFIG.endpoints.listInbounds}`, {
       headers: { Cookie: cookie, "Content-Type": "application/json" },
       cache: "no-store",
     });
     const listJson = await listRes.json();
-    const inbounds = listJson.obj || listJson.data || [];
+    const inbounds = listJson.obj || [];
 
-    // 2. جستجوی کاربر
     let foundClient = null;
     let foundInbound = null;
+    let foundStats = null;
 
+    // ۲. جستجو در اینباندها برای پیدا کردن کلاینت و آمار مصرف
     for (const inbound of inbounds) {
-      // پارس کردن تنظیمات برای دسترسی به کلاینت‌ها
-      if (typeof inbound.settings === "string") {
-        try {
-          inbound.settings = JSON.parse(inbound.settings);
-        } catch (e) {}
-      }
-      // پارس کردن تنظیمات شبکه برای ساخت لینک صحیح
-      if (typeof inbound.streamSettings === "string") {
-        try {
-          inbound.streamSettings = JSON.parse(inbound.streamSettings);
-        } catch (e) {}
-      }
-
-      const clients = inbound.settings?.clients || [];
-      const client = clients.find((c: any) => c.email === cleanEmail);
-
+      let settings = typeof inbound.settings === "string" ? JSON.parse(inbound.settings) : inbound.settings;
+      const client = settings?.clients?.find((c: any) => c.email === cleanEmail);
+      
       if (client) {
         foundClient = client;
         foundInbound = inbound;
+        // پیدا کردن آمار مصرف از آرایه clientStats موجود در اینباند
+        foundStats = inbound.clientStats?.find((s: any) => s.email === cleanEmail);
         break;
       }
     }
 
     if (!foundClient || !foundInbound) {
-      return { success: false, message: "کاربر پیدا نشد" };
+      return { success: false, message: "کاربر یافت نشد" };
     }
 
-    // 3. ساخت لینک VLESS
-    // استخراج آدرس هاست از کانفیگ بیس
+    // ۳. ساخت لینک VLESS
     const hostUrl = new URL(CONFIG.baseUrl);
-    const address = hostUrl.hostname; // مثلا net.abznet.top
-    const port = foundInbound.port;
-    const uuid = foundClient.id;
-    const type = foundInbound.streamSettings?.network || "tcp";
-    const security = foundInbound.streamSettings?.security || "none";
-    const flow = foundClient.flow || ""; // برای xtls/reality
+    const vlessLink = `vless://${foundClient.id}@${hostUrl.hostname}:${foundInbound.port}?type=tcp&security=none#${cleanEmail}`;
 
-    let query = `type=${type}&security=${security}`;
+    // ۴. محاسبه ترافیک (این بخش در خروجی قبلی شما غایب بود)
+    const totalBytes = foundStats?.total || 0;
+    const up = foundStats?.up || 0;
+    const down = foundStats?.down || 0;
+    const consumedBytes = up + down;
+    
+    // تبدیل بایت به گیگابایت
+    const remainingGB = totalBytes > 0 
+      ? ((totalBytes - consumedBytes) / (1024 ** 3)).toFixed(2) 
+      : "نامحدود";
 
-    // اضافه کردن تنظیمات اختصاصی (Path برای WS و ...)
-    if (type === "ws") {
-      const path = foundInbound.streamSettings?.wsSettings?.path || "/";
-      query += `&path=${encodeURIComponent(path)}`;
-      const host = foundInbound.streamSettings?.wsSettings?.headers?.Host || "";
-      if (host) query += `&host=${host}`;
+    let remainingDays = "نامحدود";
+    if (foundStats?.expiryTime > 0) {
+      const diff = foundStats.expiryTime - Date.now();
+      remainingDays = diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)).toString() : "0";
     }
 
-    if (flow) {
-      query += `&flow=${flow}`;
-    }
+    // خروجی کامل که کلاینت لازم دارد
+    return {
+      success: true,
+      link: vlessLink,
+      traffic: {
+        remainingGB,
+        remainingDays,
+        consumedGB: (consumedBytes / (1024 ** 3)).toFixed(2),
+        isExpired: foundStats?.enable === false || (totalBytes > 0 && (totalBytes - consumedBytes) <= 0)
+      },
+      message: "اطلاعات با موفقیت دریافت شد"
+    };
 
-    // ساخت لینک نهایی
-    const vlessLink = `vless://${uuid}@${address}:${port}?${query}#${cleanEmail}`;
-
-    return { success: true, link: vlessLink, message: "لینک دریافت شد" };
   } catch (error: any) {
+    console.error("Error in getVlessLinkAction:", error);
     return { success: false, message: error.message };
   }
 }

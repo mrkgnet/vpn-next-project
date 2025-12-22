@@ -30,15 +30,10 @@ export const AuthProvider = ({ children }) => {
         setIsLoggedIn(false);
       }
     } catch (error) {
-      // ★ تغییر مهم اینجاست:
-      // چک میکنیم اگر ارور 401 بود، یعنی فقط کاربر لاگین نیست (عادیه)
       if (axios.isAxiosError(error) && error.response?.status === 401) {
-        // کاربر لاگین نیست -> فقط استیت‌ها رو خالی میکنیم
         setUser(null);
         setIsLoggedIn(false);
-        // اینجا دیگه console.error نمیذاریم تا قرمز نشه
       } else {
-        // اگر ارور دیگه ای بود (مثلا سرور قطع بود)، اون موقع لاگ بنداز
         console.error("Auth check failed", error);
         setIsLoggedIn(false);
       }

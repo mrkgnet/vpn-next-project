@@ -1,45 +1,52 @@
 "use client";
+import { getPurchaseHistory } from "@/actions/purchaseHistory";
 import { addUserAction } from "@/app/(user)/dashboard/actions";
 import { useAuth } from "@/context/AuthContext";
 import pricing from "@/lib/pricing";
-import {  Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+// تعریف تایپ props
+
+
 const BuyAccount = () => {
+  // اضافه کردن checkAuth برای آپدیت موجودی بعد از خرید
   const { user, isLoading, checkAuth } = useAuth();
   const router = useRouter();
-
+  const [purchases, setPurchases] = useState<any[]>([]);
   const [traffic, setTraffic] = useState(10);
   const [month, setMonth] = useState(31);
-
   const [inviteCode, setInviteCode] = useState("");
-  // const [isCopied, setIsCopied] = useState(false);
-  // const [purchasedAccounts, setPurchasedAccounts] = useState([
-  //   {
-  //     id: 1,
-  //     username: inviteCode,
-  //     gb: traffic,
-  //     days: month,
-  //     date: new Date().toISOString(),
-  //   },
-  // ]);
-
-  //استیت برای لودینگ
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  function handleChangeGB(e) {
+  // ۱. تابع لود کردن تاریخچه (قابل استفاده مجدد)
+  const fetchHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+    const result = await getPurchaseHistory();
+    if (result?.success) {
+      setPurchases(result.data);
+    }
+    setIsLoadingHistory(false);
+  }, []);
+
+  useEffect(() => {
+    fetchHistory();
+    generateCode();
+  }, [fetchHistory]);
+
+  function handleChangeGB(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = Number(e.target.value);
     setTraffic(val);
   }
 
-  function handleChangeMonth(e) {
+  function handleChangeMonth(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = Number(e.target.value);
     setMonth(val);
   }
 
-  // آیکون‌ها برای تمیزی کد اینجا تعریف شده‌اند
   const Icons = {
     User: () => (
       <svg
@@ -127,7 +134,6 @@ const BuyAccount = () => {
     ),
   };
 
-  // تابع تولید کد ۷ رقمی (حروف و اعداد)
   const generateCode = () => {
     const characters = "abcdefghijklmnopqrstuvwxyz";
     let result = "";
@@ -138,67 +144,67 @@ const BuyAccount = () => {
     setInviteCode(result);
   };
 
-  // تولید کد هنگام لود شدن کامپوننت
   useEffect(() => {
     generateCode();
   }, []);
 
-  const currentPrice = pricing(traffic, month);
-
-  // تابع تبدیل تاریخ میلادی به شمسی
-  const toPersianDate = (dateString: string | number | Date) => {
-    return new Date(dateString).toLocaleDateString("fa-IR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const currentPrice = pricing(Number(traffic), Number(month));
 
   const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 🔴 چک کردن وضعیت لاگین قبل از هر کاری
     if (!user) {
       toast.warn("برای خرید اشتراک ابتدا باید وارد حساب کاربری خود شوید.");
-      // هدایت به صفحه لاگین
       router.push(`/auth/login?redirect=/`);
-      // جلوگیری از ادامه اجرای تابع
       return;
     }
 
-
-    if(user.userWallet < currentPrice){
+    if (user.userWallet < currentPrice) {
       toast.warn("موجودی کیف پول شما کافی نیست.");
       return;
-    } 
+    }
 
     setIsSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
+    // ساختن FormData به صورت دستی برای اطمینان از صحت داده‌ها
+    const formData = new FormData();
     formData.append("username", inviteCode);
     formData.append("totalGB", traffic.toString());
     formData.append("days", month.toString());
 
     try {
       const result = await addUserAction(formData);
-      if (result.success == true) {
-        toast.success("اشتراک با موفقیت خریداری شد");
+
+      // ✅ اصلاح: چک کردن success به جای status
+      if (result.success) {
+        toast.success(result.message || "اشتراک با موفقیت خریداری شد");
+
+        await fetchHistory()
+
+        if (checkAuth) await checkAuth(); // ۲. موجودی کیف پول را در هدر/سایدبار آپدیت می‌کند
+        // ✅ اصلاح: تولید کد جدید برای خرید بعدی
+        generateCode();
+
+        // ✅ اصلاح مهم: به‌روزرسانی موجودی کیف پول در ظاهر برنامه
+        if (checkAuth) {
+          await checkAuth();
+        }
+
+        router.refresh();
       } else {
-        toast.error("خطا در انجام عملیات");
+        toast.error(result.message || "خطا در انجام عملیات");
       }
     } catch (error) {
       console.error("Error buying account:", error);
+      toast.error("خطای غیرمنتظره رخ داد");
     } finally {
-      setIsSubmitting(false); // پایان لودینگ
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className=" flex items-center justify-center bg-gray-50 p-4">
       <div className="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden border border-gray-100">
-        {/* هدر کارت */}
         <div className="bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 text-white flex items-center justify-between">
           <div>
             <h2 className=" font-bold flex items-center gap-2">
@@ -210,7 +216,6 @@ const BuyAccount = () => {
 
         <div className="p-6">
           <form onSubmit={handleClick} className="flex flex-col gap-5">
-            {/* ورودی نام کاربری */}
             <div className="group">
               <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">نام کاربری</label>
               <div className="relative flex items-center group">
@@ -218,7 +223,8 @@ const BuyAccount = () => {
                   type="text"
                   value={inviteCode}
                   readOnly
-                  name="email"
+                  // ✅ اصلاح: تغییر name به username برای هماهنگی با بک‌اند (هرچند با formData دستی حل شده بود)
+                  name="username"
                   className="w-full pr-12 pl-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all text-sm font-bold text-gray-700 tracking-widest text-center"
                   dir="ltr"
                 />
@@ -226,7 +232,6 @@ const BuyAccount = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* انتخاب حجم */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">حجم (گیگ)</label>
                 <div className="relative">
@@ -253,7 +258,6 @@ const BuyAccount = () => {
                 </div>
               </div>
 
-              {/* انتخاب زمان */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">زمان (روز)</label>
                 <div className="relative">
@@ -276,29 +280,70 @@ const BuyAccount = () => {
               </div>
             </div>
 
-            {/* کارت محاسبه مبلغ */}
             <div className="mt-2 p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center gap-1">
               <p className="text-amber-800/70 text-xs font-medium">مبلغ قابل پرداخت</p>
               <div className="flex items-baseline gap-1 text-amber-900">
-                <span className="text-2xl font-black tracking-tight">{currentPrice}</span>
-
+                <span className="text-2xl font-black tracking-tight">{currentPrice.toLocaleString()}</span>
                 <span className="text-sm font-medium">تومان</span>
               </div>
-              <hr />
-              <span className="text-xs border-t-2 py-1.5 text-gray-500">
-                {user?.userWallet ? `موجودی کیف پول: ${user.userWallet} تومان` : ""}
+              <hr className="w-full border-amber-200/60 my-1" />
+              <span className="text-xs py-1.5 text-gray-600 font-medium">
+                {user?.userWallet != undefined ? `موجودی کیف پول: ${user.userWallet.toLocaleString()} تومان` : "..."}
               </span>
             </div>
 
-            {/* دکمه ارسال */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 cursor-pointer bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold py-2.5 px-4 rounded-xl shadow  transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+              className="w-full mt-2 cursor-pointer bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold py-2.5 px-4 rounded-xl shadow transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? <Loader2 className="animate-spin h-7 w-7" /> : <span>خرید</span>}
             </button>
           </form>
+
+          <div className=" mt-4 text-center text-sm text-gray-600 ">
+            <h5>لیست اکانت های خریداری شده </h5>
+
+            <hr />
+
+            <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 border border-gray-100">
+              <h5 className="text-sm font-bold text-gray-700 mb-4 text-right border-b pb-2">تاریخچه خریدها</h5>
+
+              {isLoadingHistory ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="animate-spin text-gray-300" />
+                </div>
+              ) : purchases.length === 0 ? (
+                <p className="text-xs text-center text-gray-400 py-4">تراکنشی یافت نشد.</p>
+              ) : (
+                <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
+                  {purchases.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-gray-50 border border-gray-100 rounded-lg p-3 flex justify-between items-center hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-gray-800" dir="ltr">
+                          {item.username}
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          {new Date(item.createdAt).toLocaleDateString("fa-IR")}
+                        </p>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <span className="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-1 rounded border border-emerald-100">
+                          {item.gb}GB
+                        </span>
+                        <span className="bg-blue-50 text-blue-700 text-[10px] px-2 py-1 rounded border border-blue-100">
+                          {item.days} روز
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

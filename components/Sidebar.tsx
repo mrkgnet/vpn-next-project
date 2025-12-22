@@ -9,44 +9,41 @@ import { useAuth } from "@/context/AuthContext";
 import MyAccount from "./MyAccount";
 import MyWallet from "./MyWallet";
 import BuyAccount from "./BuyAccount";
-
+import AllAcountUser from "./AllAcountUser";
 
 export default function Sidebar() {
-
-
   const [activeTabId, setActiveTabId] = useState("myAccount");
   const { isLoggedIn, isLoading, user, logOut } = useAuth();
-
-
 
   // 3. تابع سوییچ برای انتخاب کامپوننت مناسب
   // این تابع تصمیم می‌گیرد کدام کامپوننت الان باید رندر شود
   const renderContent = () => {
     switch (activeTabId) {
-      case "myAccount":
-        return <MyAccount />;
+      case "allAcountUser":
+        return <AllAcountUser />;
+
       case "buyAccount":
         return <BuyAccount />;
+
       case "AccountRenewal":
         return <AccountRenewal />;
+
       case "myWallet":
-        // 4. اینجا مقدار موجودی را به کامپوننت کیف پول پاس می‌دهیم
-        return <MyWallet  />;
+        return <MyWallet />;
+
+      
+
       default:
         return <MyAccount />;
     }
   };
 
-
   return (
     // کانتینر اصلی: در موبایل ستونی، در دسکتاپ ردیفی
     <div className="flex min-h-screen  flex-col  md:flex-row">
-
       {/* ----------------- SIDEBAR (DESKTOP) ----------------- */}
       <aside className="hidden w-64 flex-col  bg-white md:flex sticky top-0 h-fit ml-4 border border-gray-300 my-6 overflow-y-auto rounded-xl shadow-lg">
-
         <nav className="flex-1 space-y-1 py-3 px-3  ">
-
           <div className="flex h-16 items-center border-b px-6 shrink-0">
             <div className="flex items-center gap-2 font-bold text-md text-blue-700">
               <LayoutDashboard className="h-6 w-6" />
@@ -57,8 +54,6 @@ export default function Sidebar() {
           {tabsData.map((tab) => {
             const isActive = activeTabId === tab.id;
             return (
-
-
               <button
                 key={tab.id}
                 onClick={() => setActiveTabId(tab.id)}
@@ -68,25 +63,18 @@ export default function Sidebar() {
                 <tab.icon />
                 <span>{tab.title} </span>
 
-
                 {/* خط نشانگر سمت راست برای حالت فعال */}
                 {isActive && (
                   <div className="absolute right-0 top-1/2 h-6 w-[4px] -translate-y-1/2 rounded-l-full bg-rose-500" />
                 )}
               </button>
-
-
-
             );
           })}
-
-
         </nav>
       </aside>
 
       {/* ----------------- MAIN CONTENT AREA ----------------- */}
       <div className="flex w-full  flex-col">
-
         {/* ----------------- TOPBAR (MOBILE) ----------------- */}
         <div className="sticky top-0 z-10 w-full bg-white shadow-sm md:hidden">
           <div className="flex w-full items-center gap-4 overflow-x-auto border-b border-gray-100 px-4 no-scrollbar">
@@ -101,9 +89,7 @@ export default function Sidebar() {
                 >
                   <tab.icon />
                   <span>{tab.title}</span>
-                  {isActive && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full bg-rose-500" />
-                  )}
+                  {isActive && <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full bg-rose-500" />}
                 </button>
               );
             })}
@@ -113,7 +99,6 @@ export default function Sidebar() {
         {/* ----------------- DYNAMIC CONTENT ----------------- */}
         <div className="p-4 md:p-8">
           <div className="rounded-lg border border-dashed border-gray-300 bg-white p-12 text-center">
-
             {/* نمایش لودر در صورت نیاز */}
             {isLoading ? (
               <p>در حال بررسی...</p>
@@ -121,26 +106,25 @@ export default function Sidebar() {
               // حالتی که کاربر لاگین نیست
               <div className="flex gap-2 justify-center items-center mb-6">
                 <p> شما هنوز وارد نشدید</p>
-                <Link href="/auth/login" className="border bg-blue-500 text-white px-4 py-1 rounded-md">برای ورود کلیک کنید</Link>
+                <Link href="/auth/login" className="border bg-blue-500 text-white px-4 py-1 rounded-md">
+                  برای ورود کلیک کنید
+                </Link>
               </div>
             ) : (
               // حالتی که کاربر لاگین است (می‌توانی شماره‌اش را نشان دهی)
               <div className="mb-4 text-green-600 space-x-3.5 flex items-center justify-center">
                 سلام کاربر {user?.phoneNumber} 👋
-
-                <button type="button" onClick={logOut} 
-                 className=" cursor-pointer  bg-red-700 hover:from-red-700 hover:to-red-600 text-white  py-1 px-4 rounded-xl shadow-lg  transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">خروج</button>
-
+                <button
+                  type="button"
+                  onClick={logOut}
+                  className=" cursor-pointer  bg-red-700 hover:from-red-700 hover:to-red-600 text-white  py-1 px-4 rounded-xl shadow-lg  transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  خروج
+                </button>
               </div>
             )}
 
-            <h2 className="text-lg font-semibold text-gray-700">
-            {renderContent()}
-            </h2>
-
-
-
-
+            <h2 className="text-lg font-semibold text-gray-700">{renderContent()}</h2>
           </div>
         </div>
       </div>

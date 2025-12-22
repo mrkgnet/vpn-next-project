@@ -27,7 +27,7 @@ export default function DashboardLayout({
   return (
     <div className="container mx-auto">
 
-      <Sidebar />
+      
       {children}
 
     </div>

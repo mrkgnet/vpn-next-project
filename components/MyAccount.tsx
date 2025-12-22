@@ -1,6 +1,5 @@
 'use client'
 
-import { getVlessLinkAction } from '@/app/(user)/dashboard/actions';
 import React, { useState } from 'react'
 import { Link, Copy, Check, Search, Mail, AlertCircle, Loader2 } from 'lucide-react';
 
@@ -20,7 +19,7 @@ const MyAccount = () => {
         setLink(null);
 
         try {
-            const result = await getVlessLinkAction(formData);
+            const result = await getVlessLinkDetailsAction(formData);
             setLoading(true);
             if (result.success && result.link) {
                 setLink(result.link);
