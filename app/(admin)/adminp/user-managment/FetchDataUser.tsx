@@ -3,6 +3,8 @@ import UserData from "./UserData";
 
 export default async function FetchDataUser() {
    const result = await FetchUser();
-  const data = result.success ? result.data : [];
-  return <UserData initialUsers={data} />;
+  // اضافه کردن چک کردن برای جلوگیری از undefined
+const data = (result && result.success && result.data) ? result.data : [];
+
+return <UserData initialUsers={data} />;
 }

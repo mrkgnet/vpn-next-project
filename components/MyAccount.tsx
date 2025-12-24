@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import { Link, Copy, Check, Search, Mail, AlertCircle, Loader2 } from 'lucide-react';
+// ۱. ایمپورت کردن اکشن برای رفع خطای "Cannot find name"
+import { getVlessLinkDetailsAction } from "@/app/(user)/dashboard/actions";
 
 const MyAccount = () => {
     const [link, setLink] = useState<string | null>(null);
@@ -9,18 +11,17 @@ const MyAccount = () => {
     const [loading, setLoading] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     
-    // 1. اضافه کردن state برای مقدار اینپوت
     const [inputValue, setInputValue] = useState("");
-    // استیت برای نمایش تیک سبز روی تگ vipsah
     const [isTagCopied, setIsTagCopied] = useState(false);
 
+    // اصلاح تابع هندل فرم برای سازگاری با Next.js Server Actions
     async function handleSubmit(formData: FormData) {
+        setLoading(true); // فعال سازی لودینگ در شروع
         setMessage(null);
         setLink(null);
 
         try {
             const result = await getVlessLinkDetailsAction(formData);
-            setLoading(true);
             if (result.success && result.link) {
                 setLink(result.link);
                 setMessage(null);
@@ -42,15 +43,9 @@ const MyAccount = () => {
         }
     }
 
-    // 2. تابعی برای هندل کردن کلیک روی تگ (پر کردن اینپوت + کپی)
     const handleTagClick = async (text: string) => {
-        // پر کردن اینپوت
         setInputValue(text);
-        
-        // کپی کردن در کلیپ‌بورد
         await navigator.clipboard.writeText(text);
-        
-        // نمایش وضعیت کپی شد
         setIsTagCopied(true);
         setTimeout(() => setIsTagCopied(false), 1500);
     };
@@ -72,6 +67,7 @@ const MyAccount = () => {
                 </div>
 
                 <div className="p-6 space-y-6">
+                    {/* استفاده از action برای Server Action */}
                     <form action={handleSubmit} className="flex flex-col gap-4">
                         <div>
                             <label className="block text-xs font-bold text-gray-600 mb-1.5 mr-1">نام کاربری (اشتراک)</label>
@@ -82,20 +78,18 @@ const MyAccount = () => {
                                 <input
                                     type="text"
                                     name="email"
-                                    // 3. اتصال اینپوت به State
                                     value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="vipseas نام کاربری اشتراک مثلا "
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+                                    placeholder="نام کاربری اشتراک مثلا vipsah"
                                     required
                                     className="w-full pr-10 pl-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-sm font-medium text-gray-700"
                                     dir="ltr"
                                 />
                             </div>
                             
-                            {/* 4. بخش تگ‌های قابل کلیک */}
                             <div className='font_xs flex flex-wrap item-left gap-2 mt-2'>
                                 <button
-                                    type="button" // مهم: تایپ باید button باشد تا فرم را سابمیت نکند
+                                    type="button"
                                     onClick={() => handleTagClick('vipsah')}
                                     className={`
                                         flex items-center gap-1 border p-1 px-2 rounded-2xl text-xs transition-all cursor-pointer
@@ -105,11 +99,10 @@ const MyAccount = () => {
                                         }
                                     `}
                                 >
-                                    <span>{inputValue}</span>
+                                    <span>vipsah</span>
                                     {isTagCopied ? <Check size={12} /> : <Copy size={12} className="opacity-50"/>}
                                 </button>
                             </div>
-
                         </div>
 
                         <button
@@ -131,7 +124,6 @@ const MyAccount = () => {
                         </button>
                     </form>
 
-                    {/* نمایش پیام خطا */}
                     {message && (
                         <div className="animate-in fade-in slide-in-from-top-2 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
                             <AlertCircle size={18} />
@@ -139,10 +131,8 @@ const MyAccount = () => {
                         </div>
                     )}
 
-                    {/* جداکننده */}
                     {link && <div className="h-px w-full bg-gray-100 my-2"></div>}
 
-                    {/* نمایش لینک */}
                     {link && (
                         <div className="animate-in zoom-in-95 duration-300">
                             <div className="flex justify-between items-end mb-2">
@@ -185,8 +175,6 @@ const MyAccount = () => {
                         </div>
                     )}
                 </div>
-
-                
             </div>
         </div>
     );

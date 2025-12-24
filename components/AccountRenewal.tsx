@@ -10,68 +10,38 @@ import { toast } from "react-toastify";
 function EditAcount() {
   const [traffic, setTraffic] = useState(10);
   const [month, setMonth] = useState(31);
-  const [modal, setModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, isLoading, checkAuth } = useAuth();
+  const { user, checkAuth } = useAuth();
   const router = useRouter();
 
-  function handleChangeGB(e) {
+  // اصلاح تایپ پارامتر e برای رفع خطای بیلد
+  function handleChangeGB(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = Number(e.target.value);
     setTraffic(val);
   }
 
-  function handleChangeMonth(e) {
+  function handleChangeMonth(e: React.ChangeEvent<HTMLSelectElement>) {
     const val = Number(e.target.value);
     setMonth(val);
   }
 
-  // آیکون‌ها برای تمیزی کد اینجا تعریف شده‌اند
+  // آیکون‌ها
   const Icons = {
     User: () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </svg>
     ),
     Database: () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <ellipse cx="12" cy="5" rx="9" ry="3" />
         <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
         <path d="M3 5v14c0 1.66 4 3 9 3s 9-1.34 9-3V5" />
       </svg>
     ),
     Calendar: () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
         <line x1="16" x2="16" y1="2" y2="6" />
         <line x1="8" x2="8" y1="2" y2="6" />
@@ -79,32 +49,12 @@ function EditAcount() {
       </svg>
     ),
     ChevronDown: () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="m6 9 6 6 6-6" />
       </svg>
     ),
     Refresh: () => (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
         <path d="M21 3v5h-5" />
         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
@@ -117,55 +67,49 @@ function EditAcount() {
 
   const handleClick = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setIsSubmitting(true);
 
     if (!user) {
       toast.warn("برای خرید اشتراک ابتدا باید وارد حساب کاربری خود شوید.");
-      // هدایت به صفحه لاگین
       router.push(`/auth/login?redirect=/dashboard`);
-      // جلوگیری از ادامه اجرای تابع
       return;
     }
 
-    
-
-    // چک کردن اعتبار کاربر
     if (user.userWallet < currentPrice) {
       toast.error("موجودی حساب شما برای تمدید سرویس کافی نیست.");
       setIsSubmitting(false);
       return;
     }
 
-    const formData = new FormData(e.currentTarget);
-    formData.append("email", e.currentTarget.email.value);
+    const currentTarget = e.currentTarget;
+    const formData = new FormData(currentTarget);
+    
+    // دسترسی ایمن به مقدار ایمیل از فرم
+    const emailInput = currentTarget.elements.namedItem('email') as HTMLInputElement;
+    formData.append("email", emailInput.value);
     formData.append("totalGB", traffic.toString());
     formData.append("days", month.toString());
 
     try {
       const res = await updateUserAction(formData);
 
-      if (res.success == true) {
-
-        await checkAuth()
-        toast.success("سرویس شما تمدید شد ");
-        // router.refresh();
+      if (res.success) {
+        await checkAuth();
+        toast.success("سرویس شما با موفقیت تمدید شد.");
       } else {
-        setIsSubmitting(false);
-
-        toast.error("سرویس تمدید نشد.");
+        toast.error(res.message || "سرویس تمدید نشد.");
       }
     } catch (error) {
-      console.error("Error buying account:", error);
+      console.error("Error updating account:", error);
+      toast.error("خطای غیرمنتظره‌ای رخ داد.");
     } finally {
-      setIsSubmitting(false); // پایان لودینگ
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className=" flex items-center justify-center bg-gray-50 p-4">
+    <div className="flex items-center justify-center bg-gray-50 p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-        {/* هدر کارت */}
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
@@ -173,13 +117,11 @@ function EditAcount() {
               تمدید / ویرایش کاربر
             </h2>
             <p className="text-amber-100 text-xs mt-1 opacity-90">اطلاعات سرویس را تغییر دهید</p>
-            {user?.userWallet ? user.userWallet.toLocaleString() : "0"}
           </div>
         </div>
 
         <div className="p-6">
           <form onSubmit={handleClick} className="flex flex-col gap-5">
-            {/* ورودی نام کاربری */}
             <div className="group">
               <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">نام کاربری</label>
               <div className="relative flex items-center">
@@ -189,7 +131,7 @@ function EditAcount() {
                 <input
                   type="text"
                   name="email"
-                  placeholder="user_exists"
+                  placeholder="نام کاربری موجود را وارد کنید"
                   required
                   className="w-full pr-10 pl-3 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none transition-all text-sm font-medium text-gray-700"
                   dir="ltr"
@@ -198,7 +140,6 @@ function EditAcount() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* انتخاب حجم */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">حجم (گیگ)</label>
                 <div className="relative">
@@ -225,7 +166,6 @@ function EditAcount() {
                 </div>
               </div>
 
-              {/* انتخاب زمان */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5 mr-1">زمان (روز)</label>
                 <div className="relative">
@@ -248,23 +188,21 @@ function EditAcount() {
               </div>
             </div>
 
-            {/* کارت محاسبه مبلغ */}
             <div className="mt-2 p-4 rounded-xl bg-amber-50 border border-amber-100 flex flex-col items-center justify-center gap-1">
               <p className="text-amber-800/70 text-xs font-medium">مبلغ قابل پرداخت</p>
               <div className="flex items-baseline gap-1 text-amber-900">
-                <span className="text-2xl font-black tracking-tight">{currentPrice.toLocaleString()}</span>
+                <span className="text-2xl font-black tracking-tight">{currentPrice.toLocaleString("fa-IR")}</span>
                 <span className="text-sm font-medium">تومان</span>
               </div>
-               <span className="text-xs border-t-2 py-1.5 text-gray-500">
-                 {user?.userWallet? `موجودی کیف پول: ${user.userWallet} تومان` : ''}
-                </span>
+              <span className="text-xs border-t border-amber-200 mt-2 pt-2 text-gray-600 w-full text-center">
+                {user?.userWallet ? `موجودی کیف پول: ${user.userWallet.toLocaleString("fa-IR")} تومان` : 'موجودی صفر'}
+              </span>
             </div>
 
-            {/* دکمه ارسال */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-red-500/30 transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+              className="w-full mt-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-red-500/30 transform hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>تمدید اشتراک</span>}
             </button>

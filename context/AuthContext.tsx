@@ -1,37 +1,42 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Children, createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-const AuthContext = createContext();
+// 1. تعریف دقیق ساختار اطلاعات کانتکست
+interface AuthContextType {
+  user: any;
+  isLoggedIn: boolean;
+  isLoading: boolean;
+  checkAuth: () => Promise<void>;
+  logOut: () => Promise<void>;
+}
 
-export const AuthProvider = ({ children }) => {
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
- 
+  
   const router = useRouter();
-  const role =''; 
 
   const checkAuth = async () => {
     try {
       const res = await axios.get("/api/auth/me");
-     
+      
       if (res.data.user) {
         setUser(res.data.user);
         setIsLoggedIn(true);
-        setIsLoading(false);
       } else {
         setUser(null);
         setIsLoggedIn(false);
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        setUser(null);
-        setIsLoggedIn(false);
-      } else {
+      setUser(null);
+      setIsLoggedIn(false);
+      if (!axios.isAxiosError(error) || error.response?.status !== 401) {
         console.error("Auth check failed", error);
-        setIsLoggedIn(false);
       }
     } finally {
       setIsLoading(false);
@@ -44,8 +49,6 @@ export const AuthProvider = ({ children }) => {
 
   const logOut = async () => {
     try {
-
-      
       await axios.post("/api/auth/logout");
       setUser(null);
       setIsLoggedIn(false);
@@ -56,12 +59,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <>
-      <AuthContext.Provider value={{ user, isLoggedIn, isLoading, logOut, checkAuth }}>{children}</AuthContext.Provider>
-    </>
+    // حالا تمام مقادیر با Interface مطابقت دارند
+    <AuthContext.Provider value={{ user, isLoggedIn, isLoading, logOut, checkAuth }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

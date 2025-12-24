@@ -39,7 +39,7 @@ export async function ChargeUserWallet(phoneNumber: string, amount: number) {
         return { success: false, error: "لطفا تمامی فیلد ها را پر کنید" };
     }
 
-    console.log(phoneNumber,"+++++++++++++", amount)
+
 
 
   try {

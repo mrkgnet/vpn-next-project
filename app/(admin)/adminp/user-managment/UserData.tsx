@@ -3,15 +3,16 @@
 import React, { useEffect, useState } from "react";
 import { Trash2, UserCheck, UserX, Wallet, Search, Phone, PlusCircle, X, Loader2 } from "lucide-react";
 import FetchUser, { ChargeUserWallet, UpdateUser } from "@/actions/userAction";
+
 export default function UserData({ initialUsers }: { initialUsers: any[] }) {
   const [isActiveUser, setIsActiveUser] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [users, setUsers] = useState<any>(initialUsers);
+  const [users, setUsers] = useState<any[]>(initialUsers); // تعیین تایپ آرایه برای استیت
   const [chargeAmount, setChargeAmount] = useState<number>(0);
   const [isCharging, setIsCharging] = useState(false);
 
-  // close the modal
+  // بستن مودال با دکمه Esc
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsModalOpen(false);
@@ -20,7 +21,7 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
-  // modal
+  // باز کردن مودال شارژ
   const openChargeModal = (user: any) => {
     setSelectedUser(user.phoneNumber);
     setIsModalOpen(true);
@@ -29,21 +30,19 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
   const handleChargeUserWallet = async () => {
     if (chargeAmount <= 0) return alert("مقدار شارژ را وارد کنید");
     if (!selectedUser) return alert("شماره تلفن را وارد کنید");
-    console.log(selectedUser + "-------" + chargeAmount);
 
     setIsCharging(true);
     try {
       const result = await ChargeUserWallet(selectedUser, chargeAmount);
-      console.log(result);
       if (result.success) {
-        setUsers((prevUsers) =>
+        // اصلاح تایپ prevUsers برای رفع خطای بیلد
+        setUsers((prevUsers: any[]) =>
           prevUsers.map((user) =>
             user.phoneNumber === selectedUser ? { ...user, userWallet: user.userWallet + chargeAmount } : user
           )
         );
         setIsModalOpen(false);
         setChargeAmount(0);
-        setIsCharging(false);
       } else {
         alert(result.message);
       }
@@ -54,27 +53,24 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
     }
   };
 
-  // disable user
-
+  // تغییر وضعیت کاربر (فعال/غیرفعال)
   const toggleUserStatus = async (userID: any) => {
-    const previousUsers = [...users];
-
-    setUsers((prevUsers) =>
+    // اصلاح تایپ برای رفع خطای بیلد
+    setUsers((prevUsers: any[]) =>
       prevUsers.map((user) => (user.id === userID ? { ...user, isActive: !user.isActive } : user))
     );
 
     const result = await UpdateUser(userID, !isActiveUser);
-    if (result.success) {
-      console.log("user status updated successfully");
-    } else {
-      console.log("user status updated failed*************");
+    if (!result.success) {
+      console.log("عملیات با خطا مواجه شد");
+      // در صورت نیاز اینجا می‌توانید استیت را به حالت قبل برگردانید
     }
   };
 
-  const formatPrice = (price: number) => {
-    if (!price) return "";
-    const number = price.replace(/\D/g, ""); // حذف هر چیزی که عدد نیست
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ","); // اضافه کردن کاما
+  // اصلاح تابع فرمت قیمت (رفع خطای Property replace does not exist on type number)
+  const formatPrice = (price: any) => {
+    if (!price && price !== 0) return "";
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   return (
@@ -94,7 +90,6 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
               <th className="px-6 py-4 text-sm font-semibold text-gray-600">ردیف</th>
               <th className="px-6 py-4 text-sm font-semibold text-gray-600">شماره تلفن</th>
               <th className="px-6 py-4 text-sm font-semibold text-gray-600">تاریخ ورود</th>
-
               <th className="px-6 py-4 text-sm font-semibold text-gray-600">کیف پول</th>
               <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-center">وضعیت</th>
               <th className="px-6 py-4 text-sm font-semibold text-gray-600 text-center">عملیات</th>
@@ -109,7 +104,6 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
                   {new Date(user.createdAt).toLocaleDateString("fa-IR")}
                 </td>
 
-                {/* کیف پول با دکمه شارژ */}
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-bold text-gray-700">{user.userWallet.toLocaleString("fa-IR")}</span>
@@ -123,7 +117,6 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
                   </div>
                 </td>
 
-                {/* Toggle Button برای فعال/غیرفعال */}
                 <td className="px-6 py-4">
                   <div className="flex justify-center">
                     <button
@@ -178,7 +171,8 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
                 <label className="block text-xs text-gray-500 mb-1">مبلغ شارژ (تومان)</label>
                 <input
                   type="text"
-                  value={chargeAmount ? formatPrice(chargeAmount.toString()) : ""}
+                  // استفاده از تابع فرمت شده برای نمایش
+                  value={chargeAmount ? formatPrice(chargeAmount) : ""}
                   onChange={(e) => {
                     const rawValue = e.target.value.replace(/,/g, "");
                     if (!isNaN(Number(rawValue))) {
@@ -202,7 +196,7 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
                   className="flex-1 flex items-center justify-center bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors"
                   onClick={handleChargeUserWallet}
                 >
-                  {isCharging ? <Loader2 className="h-8 w-8 animate-spin" /> : <span>شارژ کیف پول</span>}
+                  {isCharging ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>شارژ کیف پول</span>}
                 </button>
               </div>
             </div>
