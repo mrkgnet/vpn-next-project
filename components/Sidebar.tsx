@@ -113,7 +113,7 @@ export default function Sidebar() {
             ) : (
               // حالتی که کاربر لاگین است (می‌توانی شماره‌اش را نشان دهی)
               <div className="mb-4 text-green-600 space-x-3.5 flex items-center justify-center">
-                سلام کاربر {user?.phoneNumber} 👋
+                سلام کاربر عزیز 👋
                 <button
                   type="button"
                   onClick={logOut}

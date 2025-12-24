@@ -49,13 +49,14 @@ export async function POST(request: Request) {
 
     // ۵. اگر همه چیز درست بود (ساخت توکن)
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_secret');
-    const token = await new SignJWT({ userId: user.id, phoneNumber: user.phoneNumber })
+    const token = await new SignJWT({ userId: user.id, phoneNumber: user.phoneNumber ,role: user.role })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')
       .sign(secret);
 
     const response = NextResponse.json({
       status: 'success',
+      token:token,
       message: "ورود موفقیت آمیز بود",
     });
 

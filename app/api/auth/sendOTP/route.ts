@@ -11,7 +11,6 @@ export async function POST(request: Request) {
 
     // Generate a random 5-digit code
     const code = Math.floor(10000 + Math.random() * 90000).toString();
-
     // Set the expiration time to 60 seconds from now
     const expireTime = (Date.now() + 60 * 1000).toString();
 
@@ -19,8 +18,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization:
-          "YTA2Njk0NzktMzQwNC00ZDU4LTg5MDYtNzNlMGE0ZWM4OGMxY2I2NjhlYzQ4NGRhN2U2MmM3YWVlODc3ZmI3NWUxY2E=",
+        Authorization: "YTA2Njk0NzktMzQwNC00ZDU4LTg5MDYtNzNlMGE0ZWM4OGMxY2I2NjhlYzQ4NGRhN2U2MmM3YWVlODc3ZmI3NWUxY2E=",
       },
       body: JSON.stringify({
         sending_type: "pattern",
@@ -59,7 +57,6 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error("خطا:", error);
-
 
     return NextResponse.json({ error: "خطای ناشناخته" }, { status: 500 });
   }

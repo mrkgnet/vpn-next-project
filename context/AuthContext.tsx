@@ -1,13 +1,7 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import {
-  Children,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { Children, createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
@@ -15,12 +9,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+ 
   const router = useRouter();
+  const role =''; 
 
   const checkAuth = async () => {
     try {
       const res = await axios.get("/api/auth/me");
-
+     
       if (res.data.user) {
         setUser(res.data.user);
         setIsLoggedIn(true);
@@ -48,6 +44,8 @@ export const AuthProvider = ({ children }) => {
 
   const logOut = async () => {
     try {
+
+      
       await axios.post("/api/auth/logout");
       setUser(null);
       setIsLoggedIn(false);
@@ -59,11 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <>
-      <AuthContext.Provider
-        value={{ user, isLoggedIn, isLoading, logOut, checkAuth }}
-      >
-        {children}
-      </AuthContext.Provider>
+      <AuthContext.Provider value={{ user, isLoggedIn, isLoading, logOut, checkAuth }}>{children}</AuthContext.Provider>
     </>
   );
 };

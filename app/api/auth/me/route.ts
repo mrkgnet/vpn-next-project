@@ -38,7 +38,8 @@ export async function GET(request: Request) {
       select: {
         id: true,
         phoneNumber: true,
-        userWallet: true, // ✅ این چیزی است که نیاز دارید
+        userWallet: true,
+        role:true // ✅ این چیزی است که نیاز دارید
         // usreAccount: true, // اگر نیاز دارید آنکامنت کنید
         // سایر فیلدهایی که می‌خواهید در فرانت داشته باشید
       }
