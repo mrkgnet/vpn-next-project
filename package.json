@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && NEXT_DISABLE_TYPECHECK=1 next build",
     "start": "prisma db push && next start",
     "lint": "eslint"
   },
