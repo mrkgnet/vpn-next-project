@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     // این تنظیم باعث می‌شود خطاهای Linting هم در زمان بیلد نادیده گرفته شوند
     ignoreDuringBuilds: true,
   },
+  output: 'standalone', // لیارا به این گزینه نیاز دارد
   // سایر تنظیمات در صورت نیاز اینجا اضافه شوند
 };
 
