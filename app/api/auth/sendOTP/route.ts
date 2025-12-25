@@ -1,5 +1,4 @@
-import { succeed } from "../../../../node_modules/effect/src/Channel";
-import { status } from "../../../../node_modules/effect/src/Fiber";
+
 // مسیر فایل: app/api/auth/route.ts
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
