@@ -4,6 +4,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "noImplicitAny": false, // این خط را اضافه یا به false تغییر دهید
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
