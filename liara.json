@@ -1,0 +1,8 @@
+{
+    "app": "mrkg",
+    "port": 3000,
+    "platform": "next",
+    "next": {
+        "mirror": false
+    }
+}
