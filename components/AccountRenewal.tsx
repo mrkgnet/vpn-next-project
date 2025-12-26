@@ -108,7 +108,7 @@ function EditAcount() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-gray-50 p-4">
+    <div className="flex items-center justify-center bg-gray-50">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white flex items-center justify-between">
           <div>

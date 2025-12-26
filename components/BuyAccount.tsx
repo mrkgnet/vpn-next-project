@@ -203,7 +203,7 @@ const BuyAccount = () => {
   };
 
   return (
-    <div className=" flex items-center justify-center bg-gray-50 p-4">
+    <div className=" flex items-center justify-center bg-gray-50 ">
       <div className="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-gradient-to-r from-emerald-500 to-emerald-800 p-4 text-white flex items-center justify-between">
           <div>
@@ -301,10 +301,10 @@ const BuyAccount = () => {
             </button>
           </form>
 
-          <div className=" mt-4 text-center text-sm text-gray-600 ">
-            <h5>لیست اکانت های خریداری شده </h5>
+          <div className=" text-center text-sm text-gray-600 ">
+            <h5 className="my-4">لیست اکانت های خریداری شده </h5>
 
-            <hr />
+         
 
             <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 border border-gray-100">
               <h5 className="text-sm font-bold text-gray-700 mb-4 text-right border-b pb-2">تاریخچه خریدها</h5>

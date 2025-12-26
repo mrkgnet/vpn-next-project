@@ -67,7 +67,7 @@ export default function AllAcountUser() {
   return (
     <div>
       <div className=" mt-4 text-center text-sm text-gray-600 ">
-        <hr />
+      
         <div className="bg-white w-full rounded-xl shadow-lg p-6 border border-gray-100">
           <h5 className="text-sm font-bold text-gray-700 mb-4 text-right border-b pb-2">تاریخچه خریدها</h5>
 
@@ -115,7 +115,7 @@ export default function AllAcountUser() {
                   </div>
 
                   {expandedId === item.id && (
-                    <div className="bg-[#f8fafc] p-6 border-t border-gray-100 animate-in fade-in zoom-in-95 duration-300 rounded-b-xl">
+                    <div className="bg-[#f8fafc]  border-t border-gray-100 animate-in fade-in zoom-in-95 duration-300 rounded-b-xl">
                       <div className="flex flex-col gap-6">
                         <div className="flex justify-between items-center border-b border-gray-200 pb-3">
                           <h6 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Service Status</h6>

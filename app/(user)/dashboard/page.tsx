@@ -7,6 +7,7 @@ export default async function page() {
     
   return (
     <div>
+      <h1>skdfsjdlfksjdfk</h1>
       {<Sidebar />}
     </div>
   )

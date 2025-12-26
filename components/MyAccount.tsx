@@ -51,7 +51,7 @@ const MyAccount = () => {
     };
 
     return (
-        <div className="flex items-center justify-center p-6">
+        <div className="flex items-center justify-center ">
             <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-2xl">
 
                 {/* هدر رنگی */}
@@ -90,7 +90,7 @@ const MyAccount = () => {
                             <div className='font_xs flex flex-wrap item-left gap-2 mt-2'>
                                 <button
                                     type="button"
-                                    onClick={() => handleTagClick('vipsah')}
+                                    onClick={() => handleTagClick('')}
                                     className={`
                                         flex items-center gap-1 border p-1 px-2 rounded-2xl text-xs transition-all cursor-pointer
                                         ${isTagCopied 
@@ -99,7 +99,7 @@ const MyAccount = () => {
                                         }
                                     `}
                                 >
-                                    <span>vipsah</span>
+                                   
                                     {isTagCopied ? <Check size={12} /> : <Copy size={12} className="opacity-50"/>}
                                 </button>
                             </div>

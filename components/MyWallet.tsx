@@ -106,8 +106,8 @@ export default function MyWallet() {
   return (
     <div className="mx-auto max-w-2xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">کیف پول من</h1>
-        <span className="text-sm text-gray-400">تاریخ امروز: ۱۴۰۳/۰۹/۲۴</span>
+        <h1 className="text-xl font-bold text-gray-800">کیف پول من</h1>
+       
       </div>
 
       {/* ----------------- کارت موجودی ----------------- */}
@@ -129,7 +129,7 @@ export default function MyWallet() {
               className="group flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-sm transition hover:bg-white/20 active:scale-95 disabled:opacity-70"
               title="بروزرسانی موجودی"
             >
-              <span className="text-base">بروزرسانی</span>
+              <span className="hidden md:text-base">بروزرسانی</span>
               <RefreshCw
                 className={`h-3.5 w-3.5 transition-all duration-700 ${
                   isRefreshing ? "animate-spin" : "group-hover:rotate-180"
@@ -140,11 +140,11 @@ export default function MyWallet() {
 
           <div className="flex items-baseline gap-2">
             {/* نمایش موجودی */}
-            <span className="text-4xl font-bold tracking-tight">
+            <span className="text-2xl font-bold tracking-tight">
               {user?.userWallet ? user.userWallet.toLocaleString() : "0"}
             </span>
 
-            <span className="text-xl opacity-80">تومان</span>
+            <span className="text-base opacity-80">تومان</span>
           </div>
         </div>
       </div>
@@ -156,12 +156,12 @@ export default function MyWallet() {
             <div className="rounded-lg bg-green-50 p-2 text-green-600">
               <Plus className="h-5 w-5" />
             </div>
-            <h3 className="font-semibold">افزایش موجودی</h3>
+            <h6 className="font-semibold text-sm md:text-base">افزایش موجودی</h6>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs text-gray-500">مبلغ مورد نظر (تومان)</label>
+              <label className="my-3 block text-xs text-gray-500">مبلغ مورد نظر (تومان)</label>
               <div className="relative">
                 <input
                   type="text"
@@ -179,7 +179,7 @@ export default function MyWallet() {
                 <button
                   key={val}
                   onClick={() => handleQuickAdd(val)}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition hover:border-blue-500 hover:text-blue-600"
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs md:text-base font-medium text-gray-600 transition hover:border-blue-500 hover:text-blue-600"
                 >
                   +{val.toLocaleString()}
                 </button>
@@ -189,14 +189,14 @@ export default function MyWallet() {
             <button
               onClick={handlePayment}
               disabled={isSubmitting}
-              className="flex cursor-pointer w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 shadow-lg "
+              className="flex cursor-pointer w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 md:py-3 font-semibold text-white transition hover:bg-blue-700 shadow-lg "
             >
               <CreditCard className="h-5 w-5" />
              {
               isSubmitting ? (
                 <Loader2 className="h-7 w-7 animate-spin" />
               ) :
-              <span className="text-base">افزایش موجودی</span>
+              <span className="text-xs md:text-base">افزایش موجودی</span>
              
              }
             </button>
