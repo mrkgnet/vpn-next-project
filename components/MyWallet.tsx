@@ -161,7 +161,7 @@ export default function MyWallet() {
 
           <div className="space-y-4">
             <div>
-              <label className="my-3 block text-xs text-gray-500">مبلغ مورد نظر (تومان)</label>
+              <label className="my-3 block text-sm text-gray-500">مبلغ مورد نظر (تومان)</label>
               <div className="relative">
                 <input
                   type="text"
@@ -174,12 +174,12 @@ export default function MyWallet() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 text-base">
               {[50000, 100000, 200000, 300000].map((val) => (
                 <button
                   key={val}
                   onClick={() => handleQuickAdd(val)}
-                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs md:text-base font-medium text-gray-600 transition hover:border-blue-500 hover:text-blue-600"
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm text-black  md:text-base font-medium  transition hover:border-blue-500 hover:text-blue-600"
                 >
                   +{val.toLocaleString()}
                 </button>
@@ -189,14 +189,14 @@ export default function MyWallet() {
             <button
               onClick={handlePayment}
               disabled={isSubmitting}
-              className="flex cursor-pointer w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2 md:py-3 font-semibold text-white transition hover:bg-blue-700 shadow-lg "
+              className="flex cursor-pointer w-full items-center justify-center gap-2 rounded-xl bg-blue-600  py-3 font-semibold text-white transition hover:bg-blue-700 shadow-lg "
             >
               <CreditCard className="h-5 w-5" />
              {
               isSubmitting ? (
                 <Loader2 className="h-7 w-7 animate-spin" />
               ) :
-              <span className="text-xs md:text-base">افزایش موجودی</span>
+              <span className="text-sm md:text-base">افزایش موجودی</span>
              
              }
             </button>

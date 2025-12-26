@@ -87,6 +87,7 @@ const AuthPage = () => {
     setIsLoading(true);
     try {
       const res = await axios.post("/api/auth/verifyOTP", { phone, code });
+    
 
       if (res.data.status === "success") {
         setStep("done");
@@ -126,7 +127,7 @@ const AuthPage = () => {
           <div className="pt-8 pb-4 px-8 text-center">
             <div className="flex justify-between items-center mb-4">
               <span></span>
-              <Link href={"/dashboard"} className="text-xs text-gray-500 hover:text-rose-500 transition-colors">برگشت به خانه</Link>
+              <Link href={"/"} className="text-xs text-gray-500 hover:text-rose-500 transition-colors">برگشت به خانه</Link>
             </div>
 
             <div className="w-16 h-16 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-rose-500/30 mb-4">

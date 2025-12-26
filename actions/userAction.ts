@@ -35,12 +35,9 @@ export async function UpdateUser(id: string, isActive: any) {
 }
 
 export async function ChargeUserWallet(phoneNumber: string, amount: number) {
-    if(!phoneNumber || !amount) {
-        return { success: false, error: "لطفا تمامی فیلد ها را پر کنید" };
-    }
-
-
-
+  if (!phoneNumber || !amount) {
+    return { success: false, error: "لطفا تمامی فیلد ها را پر کنید" };
+  }
 
   try {
     const chargeUser = await db.user.update({
@@ -51,14 +48,38 @@ export async function ChargeUserWallet(phoneNumber: string, amount: number) {
         },
       },
     });
-    revalidatePath("/adminp/user-managment")
-    return { 
-      success: true, 
-      message: 'شارژ با موفقیت انجام شد', 
-      userWallet: chargeUser.userWallet 
+    revalidatePath("/adminp/user-managment");
+    return {
+      success: true,
+      message: "شارژ با موفقیت انجام شد",
+      userWallet: chargeUser.userWallet,
     };
   } catch (error) {
     console.error("Charge Error:", error);
     return { success: false, error: "خطا در شارژ کیف پول کاربر" };
+  }
+}
+
+
+
+
+export interface DashboardStats {
+  success: boolean;
+  userCount: number;
+  totalWallets: number;
+  error?: string;
+}
+export async function GetInfoFromUsersInDB(): Promise<DashboardStats> {
+  try {
+    const userCount = await db.user.count({});
+    const totalWallets = await db.user.aggregate({ _sum: { userWallet: true } });
+    return {
+      success: true,
+      userCount,
+      totalWallets: totalWallets._sum.userWallet || 0,
+    };
+  } catch (error) {
+    console.error("Stats Error:", error);
+    return { success: false, userCount: 0, totalWallets: 0 };
   }
 }
