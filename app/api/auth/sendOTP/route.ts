@@ -1,6 +1,7 @@
 
 // مسیر فایل: app/api/auth/route.ts
 import { db } from "@/lib/db";
+import { User } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -32,19 +33,22 @@ export async function POST(request: Request) {
 
     if (response.ok) {
       console.log("OTP sent successfully.......");
-      const saveUser = await db.user.upsert({
+      const existingUser = await db.user.findUnique({
         where: { phoneNumber: phone },
+      })
+      let saveUser :User;
+      if(existingUser){
+        saveUser = await db.user.update({
+          where: { phoneNumber: phone },
+          data: { otpCode: code, otpExpires: expireTime },
+        });
+      }else{
+        saveUser = await db.user.create({
+          data: { phoneNumber: phone, otpCode: code, otpExpires: expireTime },
+        })
+      }
 
-        update: {
-          otpCode: code,
-          otpExpires: expireTime,
-        },
-        create: {
-          phoneNumber: phone,
-          otpCode: code,
-          otpExpires: expireTime,
-        },
-      });
+
 
       return NextResponse.json({
         status: "success",
