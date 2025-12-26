@@ -37,9 +37,7 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
       if (result.success) {
         // اصلاح تایپ prevUsers برای رفع خطای بیلد
         setUsers((prevUsers: any[]) =>
-          prevUsers.map((user) =>
-            user.phoneNumber === selectedUser ? { ...user, userWallet: user.userWallet + chargeAmount } : user
-          )
+          prevUsers.map((user) => (user.phoneNumber === selectedUser ? { ...user, userWallet: user.userWallet +chargeAmount } : user))
         );
         setIsModalOpen(false);
         setChargeAmount(0);
@@ -53,17 +51,28 @@ export default function UserData({ initialUsers }: { initialUsers: any[] }) {
     }
   };
 
+  useEffect(() =>{
+    setUsers(initialUsers)
+  },[initialUsers])
+
   // تغییر وضعیت کاربر (فعال/غیرفعال)
   const toggleUserStatus = async (userID: any) => {
-    // اصلاح تایپ برای رفع خطای بیلد
+    const currentUser = users.find((u) => u.id === userID);
+    if (!currentUser) return;
+
+    const newStatus = !currentUser.isActive;
+
     setUsers((prevUsers: any[]) =>
-      prevUsers.map((user) => (user.id === userID ? { ...user, isActive: !user.isActive } : user))
+      prevUsers.map((user) => (user.id === userID ? { ...user, isActive: newStatus } : user))
     );
 
-    const result = await UpdateUser(userID, !isActiveUser);
+    const result = await UpdateUser(userID, newStatus);
     if (!result.success) {
-      console.log("عملیات با خطا مواجه شد");
-      // در صورت نیاز اینجا می‌توانید استیت را به حالت قبل برگردانید
+      alert("خطا در تغییر وضعیت");
+      // در صورت خطا، وضعیت را به حالت قبل برگردانید
+      setUsers((prevUsers: any[]) =>
+        prevUsers.map((user) => (user.id === userID ? { ...user, isActive: !newStatus } : user))
+      );
     }
   };
 
