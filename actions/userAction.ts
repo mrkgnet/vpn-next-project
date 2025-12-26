@@ -1,11 +1,14 @@
 "use server";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { unstable_noStore as noStore } from "next/cache"; // این را ایمپورت کن
 
 //fetch user
 export default async function FetchUser() {
+    noStore()
   try {
     const fetchUsers = await db.user.findMany({
+    
       orderBy: {
         createdAt: "desc",
       },
@@ -48,7 +51,7 @@ export async function ChargeUserWallet(phoneNumber: string, amount: number) {
         },
       },
     });
-    revalidatePath("/adminp/user-managment");
+    revalidatePath("/adminp/user-managment","page");
     return {
       success: true,
       message: "شارژ با موفقیت انجام شد",
