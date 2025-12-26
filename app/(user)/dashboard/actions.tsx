@@ -182,7 +182,7 @@ export async function addUserAction(formData: FormData) {
         });
       });
 
-      revalidatePath("/dashboard");
+      revalidatePath("/");
       return { status: 200, success: true, message: "اشتراک با موفقیت خریداری و ساخته شد" };
     } else {
       return { success: false, message: result.msg || "خطا در پنل" };
@@ -264,7 +264,7 @@ export async function updateUserAction(formData: FormData) {
             where: { id: user.id },
             data: { userWallet: { decrement: currentPrice } },
         });
-      revalidatePath("/dashboard");
+      revalidatePath("/");
       return { success: true, message: "تمدید با موفقیت انجام شد" };
     }
     return { success: false, message: "خطا در آپدیت پنل" };

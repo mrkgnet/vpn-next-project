@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const router = useRouter();
 
+
+  // login 
   const checkAuth = async () => {
     try {
       const res = await axios.get("/api/auth/me");
@@ -47,12 +49,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
+
+
+  //logout
   const logOut = async () => {
     try {
       await axios.post("/api/auth/logout");
       setUser(null);
       setIsLoggedIn(false);
-      router.push("/dashboard");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed", error);
     }

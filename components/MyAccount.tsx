@@ -88,7 +88,7 @@ const MyAccount = () => {
                             </div>
                             
                             <div className='font_xs flex flex-wrap item-left gap-2 mt-2'>
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() => handleTagClick('')}
                                     className={`
@@ -101,7 +101,7 @@ const MyAccount = () => {
                                 >
                                    
                                     {isTagCopied ? <Check size={12} /> : <Copy size={12} className="opacity-50"/>}
-                                </button>
+                                </button> */}
                             </div>
                         </div>
 

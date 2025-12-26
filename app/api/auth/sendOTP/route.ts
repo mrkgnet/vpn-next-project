@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     // Generate a random 5-digit code
     const code = Math.floor(10000 + Math.random() * 90000).toString();
     // Set the expiration time to 60 seconds from now
-    const expireTime = (Date.now() + 60 * 1000).toString();
+    const expireTime = (Date.now() + 120 * 1000).toString();
 
     const response = await fetch("https://edge.ippanel.com/v1/api/send", {
       method: "POST",

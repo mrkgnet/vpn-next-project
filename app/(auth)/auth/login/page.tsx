@@ -55,7 +55,7 @@ const AuthPage = () => {
       const res = await axios.post("/api/auth/sendOTP", { phone });
       if (res.data.status === "success") {
         setStep("verify");
-        setTimer(60);
+        setTimer(120);
         toast.success("کد تأیید ارسال شد");
       }
     } catch (error: any) {
@@ -72,7 +72,7 @@ const AuthPage = () => {
     try {
       const res = await axios.post("/api/auth/sendOTP", { phone });
       if (res.data.status === "success") {
-        setTimer(60);
+        setTimer(120);
         toast.success("کد مجدداً ارسال شد");
       }
     } catch (error: any) {
@@ -96,7 +96,7 @@ const AuthPage = () => {
         await checkAuth();
         
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/");
         }, 1000);
       }
     } catch (error: any) {

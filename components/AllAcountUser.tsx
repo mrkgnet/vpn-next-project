@@ -78,7 +78,7 @@ export default function AllAcountUser() {
           ) : purchases.length === 0 ? (
             <p className="text-xs text-center text-gray-400 py-4">تراکنشی یافت نشد.</p>
           ) : (
-            <div className="space-y-3 max-h-52 overflow-y-auto pr-1 ">
+            <div className="space-y-3 overflow-y-auto pr-1 ">
               {purchases.map((item) => (
                 <React.Fragment key={item.id}>
                   <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 flex flex-wrap justify-between items-center hover:bg-gray-100 transition-colors">
@@ -116,8 +116,10 @@ export default function AllAcountUser() {
 
                   {expandedId === item.id && (
                     <div className="bg-[#f8fafc]  border-t border-gray-100 animate-in fade-in zoom-in-95 duration-300 rounded-b-xl">
-                      <div className="flex flex-col gap-6">
-                        <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                      <div className="flex flex-col gap-6 p-4">
+
+                        {/* service status  */}
+                        <div className="flex justify-between items-center border-b p-4 border-gray-200 pb-3">
                           <h6 className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Service Status</h6>
                           <div className="flex items-center gap-1.5">
                             <span className="relative flex h-2 w-2">
@@ -128,8 +130,8 @@ export default function AllAcountUser() {
                           </div>
                         </div>
 
-                        <div className="flex gap-4">
-                          <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+                        <div className="grid grid-cols-2 gap-4 p-4">
+                          <div className=" bg-white col-span-2 md:col-span-1 p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-6 -mt-6"></div>
                             <p className="text-[10px] text-gray-400 font-bold mb-1 relative z-10">باقی‌مانده ترافیک</p>
                             <div className="flex items-baseline gap-1 relative z-10">
@@ -140,7 +142,7 @@ export default function AllAcountUser() {
                             </div>
                           </div>
 
-                          <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
+                          <div className=" bg-white col-span-2  md:col-span-1 p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-6 -mt-6"></div>
                             <p className="text-[10px] text-gray-400 font-bold mb-1 relative z-10">اعتبار زمانی</p>
                             <div className="flex items-baseline gap-1 relative z-10">
@@ -151,6 +153,7 @@ export default function AllAcountUser() {
                             </div>
                           </div>
                         </div>
+                        
 
                         <div className="space-y-2">
                           <label className="text-[10px] text-gray-400 font-bold block px-1">کانفیگ اختصاصی شما</label>
