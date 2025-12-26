@@ -83,14 +83,9 @@
     };
 
     return (
-      <div className="p-6 relative">
+      <div className=" relative">
         {/* هدر */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">مدیریت کاربران</h1>
-            <p className="text-sm text-gray-500 mt-1">لیست تمامی کاربران سیستم</p>
-          </div>
-        </div>
+        
 
         <div className="bg-white max-h-screen overflow-scroll rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <table className="w-full text-right border-collapse">

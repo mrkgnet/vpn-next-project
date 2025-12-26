@@ -73,6 +73,7 @@ export interface DashboardStats {
   error?: string;
 }
 export async function GetInfoFromUsersInDB(): Promise<DashboardStats> {
+  noStore()
   try {
     const userCount = await db.user.count({});
     const totalWallets = await db.user.aggregate({ _sum: { userWallet: true } });

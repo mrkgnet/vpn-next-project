@@ -24,7 +24,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex gap-3 w-full container mx-auto">
+    <div className="md:flex gap-3 w-full container mx-auto">
       <aside>
         <Sidebar />
       </aside>
