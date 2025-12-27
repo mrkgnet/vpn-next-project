@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion"; 
-import { Smartphone, Lock, ArrowRight, CheckCircle, RefreshCcw, Loader2 } from "lucide-react"; 
+import { motion, AnimatePresence } from "framer-motion";
+import { Smartphone, Lock, ArrowRight, CheckCircle, RefreshCcw, Loader2, ChevronRight } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
@@ -17,7 +17,24 @@ const AuthPage = () => {
   const [timer, setTimer] = useState(0);
   const [step, setStep] = useState("phone"); // 'phone' | 'verify' | 'done'
   const [code, setCode] = useState("");
-  const router = useRouter();
+
+
+ const router = useRouter();
+  //  انتخاب خودکار اینپوت برای ورود داده 
+
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+  const codeInputRef = useRef<HTMLInputElement>(null);
+ 
+  useEffect(() => {
+    if (step === "phone") {
+      phoneInputRef.current?.focus();
+    } else if (step === "verify") {
+      codeInputRef.current?.focus();
+    }
+  }, [step]);
+
+//
+
 
   // دریافت تابع checkAuth از کانتکست (حالا تایپ شده و ایمن است)
   const { checkAuth } = useAuth();
@@ -87,15 +104,14 @@ const AuthPage = () => {
     setIsLoading(true);
     try {
       const res = await axios.post("/api/auth/verifyOTP", { phone, code });
-    
 
       if (res.data.status === "success") {
         setStep("done");
         toast.success("خوش آمدید!");
-        
+
         // فراخوانی تابع آپدیت وضعیت کانتکست
         await checkAuth();
-        
+
         setTimeout(() => {
           router.push("/");
         }, 1000);
@@ -127,7 +143,13 @@ const AuthPage = () => {
           <div className="pt-8 pb-4 px-8 text-center">
             <div className="flex justify-between items-center mb-4">
               <span></span>
-              <Link href={"/"} className="text-xs text-gray-500 hover:text-rose-500 transition-colors">برگشت به خانه</Link>
+              <Link
+                href="/"
+                className="group flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-blue-600 transition-all duration-300"
+              >
+                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <span>برگشت به خانه</span>
+              </Link>
             </div>
 
             <div className="w-16 h-16 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-rose-500/30 mb-4">
@@ -159,7 +181,8 @@ const AuthPage = () => {
                   <div className="relative group">
                     <Smartphone className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
                     <input
-                      type="tel"
+                   ref={phoneInputRef}
+                                        type="tel"
                       inputMode="numeric"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -174,7 +197,13 @@ const AuthPage = () => {
                     disabled={isLoading}
                     className="w-full py-3.5 text-white bg-blue-800 rounded-xl font-bold shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? <Loader2 className="animate-spin" /> : <>ارسال کد تأیید <ArrowRight className="w-4 h-4" /></>}
+                    {isLoading ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <>
+                        ارسال کد تأیید <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </motion.div>
               )}
@@ -190,6 +219,7 @@ const AuthPage = () => {
                 >
                   <input
                     type="text"
+                    ref={codeInputRef}
                     inputMode="numeric"
                     maxLength={5}
                     value={code}
@@ -203,13 +233,25 @@ const AuthPage = () => {
                     <button
                       onClick={reSendOtp}
                       disabled={timer > 0 || isLoading}
-                      className={`flex items-center gap-1 ${timer > 0 ? "text-gray-400" : "text-rose-600 font-medium hover:text-rose-700"}`}
+                      className={`flex items-center gap-1 ${
+                        timer > 0 ? "text-gray-400" : "text-rose-600 font-medium hover:text-rose-700"
+                      }`}
                     >
-                      {timer > 0 ? <span>{formatTime(timer)} تا ارسال مجدد</span> : <><RefreshCcw className="w-4 h-4" /> ارسال مجدد کد</>}
+                      {timer > 0 ? (
+                        <span>{formatTime(timer)} تا ارسال مجدد</span>
+                      ) : (
+                        <>
+                          <RefreshCcw className="w-4 h-4" /> ارسال مجدد کد
+                        </>
+                      )}
                     </button>
 
                     <button
-                      onClick={() => { setStep("phone"); setTimer(0); setCode(""); }}
+                      onClick={() => {
+                        setStep("phone");
+                        setTimer(0);
+                        setCode("");
+                      }}
                       className="text-gray-500 hover:text-gray-800 transition-colors"
                     >
                       ویرایش شماره

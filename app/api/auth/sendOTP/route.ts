@@ -61,6 +61,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("خطا:", error);
 
-    return NextResponse.json({ error: "خطای ناشناخته" }, { status: 500 });
+    return NextResponse.json({ error: "خطا در اسال (لطفا 2 دقیقه دیگه مجدد امتحان کنید)" }, { status: 500 });
   }
 }

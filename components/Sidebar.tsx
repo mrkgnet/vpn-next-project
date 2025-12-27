@@ -12,7 +12,7 @@ import BuyAccount from "./BuyAccount";
 import AllAcountUser from "./AllAcountUser";
 
 export default function Sidebar() {
-  const [activeTabId, setActiveTabId] = useState("myAccount");
+  const [activeTabId, setActiveTabId] = useState("buyAccount");
   const { isLoggedIn, isLoading, user, logOut } = useAuth();
 
   // 3. تابع سوییچ برای انتخاب کامپوننت مناسب
@@ -29,12 +29,13 @@ export default function Sidebar() {
         return <AccountRenewal />;
 
       case "myWallet":
-        return <MyWallet />;
-
-      
+        return <MyWallet />;  
+        
+      case "myAccount":
+        return <MyAccount />;
 
       default:
-        return <MyAccount />;
+        return <BuyAccount />;
     }
   };
 
