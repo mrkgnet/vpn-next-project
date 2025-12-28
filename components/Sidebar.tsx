@@ -43,7 +43,7 @@ export default function Sidebar() {
     // کانتینر اصلی: در موبایل ستونی، در دسکتاپ ردیفی
     <div className="flex min-h-screen my-0   md:my-4 flex-col  md:flex-row">
       {/* ----------------- SIDEBAR (DESKTOP) ----------------- */}
-      <aside className="hidden w-64 flex-col  bg-white md:flex sticky top-0 h-fit ml-4 border border-gray-300  overflow-y-auto rounded-xl shadow-lg">
+      <aside className="hidden z-10 w-64 flex-col  bg-white md:flex sticky top-0 h-fit ml-4 border border-gray-300  overflow-y-auto rounded-xl shadow-lg">
         <nav className="flex-1 space-y-1 py-3 px-3  ">
           <div className="flex h-16 items-center border-b px-6 shrink-0">
             <div className="flex items-center gap-2 font-bold text-md text-blue-700">

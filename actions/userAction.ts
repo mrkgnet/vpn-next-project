@@ -5,10 +5,9 @@ import { unstable_noStore as noStore } from "next/cache"; // این را ایم�
 
 //fetch user
 export default async function FetchUser() {
-    noStore()
+  noStore();
   try {
     const fetchUsers = await db.user.findMany({
-    
       orderBy: {
         createdAt: "desc",
       },
@@ -51,7 +50,7 @@ export async function ChargeUserWallet(phoneNumber: string, amount: number) {
         },
       },
     });
-    revalidatePath("/adminp/user-managment","page");
+    revalidatePath("/adminp/user-managment", "page");
     return {
       success: true,
       message: "شارژ با موفقیت انجام شد",
@@ -63,9 +62,6 @@ export async function ChargeUserWallet(phoneNumber: string, amount: number) {
   }
 }
 
-
-
-
 export interface DashboardStats {
   success: boolean;
   userCount: number;
@@ -73,7 +69,7 @@ export interface DashboardStats {
   error?: string;
 }
 export async function GetInfoFromUsersInDB(): Promise<DashboardStats> {
-  noStore()
+  noStore();
   try {
     const userCount = await db.user.count({});
     const totalWallets = await db.user.aggregate({ _sum: { userWallet: true } });
@@ -85,5 +81,27 @@ export async function GetInfoFromUsersInDB(): Promise<DashboardStats> {
   } catch (error) {
     console.error("Stats Error:", error);
     return { success: false, userCount: 0, totalWallets: 0 };
+  }
+}
+
+// update profile user
+
+export async function UpdateProfileUser(userId: string, username: string) {
+  if (!userId || !username) {
+    return { success: false, error: "اطلاعات ناقص است" };
+  }
+
+  try {
+    const updateUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        username: username,
+      },
+    });
+    revalidatePath("/", "layout");
+    return { success: true, data: updateUser };
+  } catch (error) {
+    console.error("Update Error:", error);
+    return { success: false, error: "خطا در تغییر اطلاعات کاربر" };
   }
 }

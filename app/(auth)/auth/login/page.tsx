@@ -18,23 +18,25 @@ const AuthPage = () => {
   const [step, setStep] = useState("phone"); // 'phone' | 'verify' | 'done'
   const [code, setCode] = useState("");
 
-
- const router = useRouter();
-  //  انتخاب خودکار اینپوت برای ورود داده 
+  const router = useRouter();
+  //  انتخاب خودکار اینپوت برای ورود داده
 
   const phoneInputRef = useRef<HTMLInputElement>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
- 
+
   useEffect(() => {
-    if (step === "phone") {
-      phoneInputRef.current?.focus();
-    } else if (step === "verify") {
-      codeInputRef.current?.focus();
-    }
+    const timer = setTimeout(() => {
+      if (step === "phone") {
+        phoneInputRef.current?.focus();
+      } else if (step === "verify") {
+        codeInputRef.current?.focus();
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, [step]);
 
-//
-
+  //
 
   // دریافت تابع checkAuth از کانتکست (حالا تایپ شده و ایمن است)
   const { checkAuth } = useAuth();
@@ -181,8 +183,8 @@ const AuthPage = () => {
                   <div className="relative group">
                     <Smartphone className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 group-focus-within:text-rose-500 transition-colors" />
                     <input
-                   ref={phoneInputRef}
-                                        type="tel"
+                      ref={phoneInputRef}
+                      type="tel"
                       inputMode="numeric"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -215,6 +217,7 @@ const AuthPage = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.3 }}
+                  onAnimationComplete={() => codeInputRef.current?.focus()}
                   className="space-y-6"
                 >
                   <input

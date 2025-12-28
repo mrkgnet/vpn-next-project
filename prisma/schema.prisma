@@ -10,9 +10,10 @@ datasource db {
 model User {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   phoneNumber String  @unique
+  username    String?  
   otpCode     String?
   otpExpires  String?
-  userWallet  Int     @default(0)
+  userWallet  Int     @default(100000)
   role        String  @default("user")
   isActive    Boolean @default(true)
 

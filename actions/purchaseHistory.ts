@@ -3,8 +3,9 @@
 import { db } from "@/lib/db";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
-
+import { unstable_noStore as noStore } from "next/cache"; // این را ایمپورت کن
 export async function getPurchaseHistory() {
+   noStore()
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;

@@ -318,7 +318,7 @@ const BuyAccount = () => {
               ) : (
                 <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
                   {purchases.map((item) => (
-                    <div
+                    <div 
                       key={item.id}
                       className="bg-gray-50 border border-gray-100 rounded-lg p-3 flex justify-between items-center hover:bg-gray-100 transition-colors"
                     >
@@ -326,10 +326,18 @@ const BuyAccount = () => {
                         <p className="text-xs font-bold text-gray-800" dir="ltr">
                           {item.username}
                         </p>
+
+               
+
+
                         <p className="text-[10px] text-gray-400 mt-1">
                           {new Date(item.createdAt).toLocaleDateString("fa-IR")}
                         </p>
                       </div>
+
+                           <p className="text-xs">اطلاعات اکانت از بخش اکانت های من قابل مشاهده است </p>
+                   
+                    
                       <div className="flex gap-1.5">
                         <span className="bg-emerald-50 text-emerald-700 text-[10px] px-2 py-1 rounded border border-emerald-100">
                           {item.gb}GB
